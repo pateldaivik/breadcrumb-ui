@@ -3,11 +3,13 @@ import { FaFile, FaFolder } from "react-icons/fa";
 
 const Breadcrumb = () => {
   useEffect(() => {
-    fetch("http://localhost:5000/path/root").then((res) =>
-      res.json().then((result) => {
-        setCurrItems(result);
-      })
-    );
+    fetch("http://localhost:5000/path/root").then((res) => {
+      if (res.status === 200) {
+        res.json().then((result) => {
+          setCurrItems(result);
+        });
+      }
+    });
   }, []);
   const [currItems, setCurrItems] = useState({});
   const [breadCrumbPath, setBreadCrumbPath] = useState(["root"]);
@@ -15,23 +17,36 @@ const Breadcrumb = () => {
   const onBreadClick = (key) => {
     setShowFileName(false);
     let newArray = breadCrumbPath.slice(0, key + 1);
-    setBreadCrumbPath(newArray);
     let path = newArray.join("/");
-    fetch("http://localhost:5000/path/" + path).then((res) =>
-      res.json().then((result) => {
-        setCurrItems(result);
+    fetch("http://localhost:5000/path/" + path)
+      .then((res) => {
+        if (res.status === 200) {
+          res.json().then((result) => {
+            setCurrItems(result);
+            setBreadCrumbPath(newArray);
+          });
+        }
       })
-    );
+      .catch((error) => {
+        alert("Network error try again");
+      });
   };
 
   const onDirClick = (key) => {
     breadCrumbPath.push(key);
     let path = breadCrumbPath.join("/");
-    fetch("http://localhost:5000/path/" + path).then((res) =>
-      res.json().then((result) => {
-        setCurrItems(result);
+    fetch("http://localhost:5000/path/" + path)
+      .then((res) => {
+        if (res.status === 200) {
+          res.json().then((result) => {
+            setCurrItems(result);
+          });
+        }
       })
-    );
+      .catch((error) => {
+        breadCrumbPath.pop();
+        alert("Network error try again");
+      });
   };
 
   const onFileClick = (key) => {
